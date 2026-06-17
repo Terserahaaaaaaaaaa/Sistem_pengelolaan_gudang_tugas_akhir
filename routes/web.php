@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\BarangController;
 use App\Http\Controllers\BarangKeluarController;
 use App\Http\Controllers\BarangMasukController;
@@ -19,6 +20,22 @@ Auth::routes();
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
 Route::middleware(['auth'])->group(function () {
+
+Route::resource('user', UserController::class);
+Route::patch('/user/{user}/aktifkan', [UserController::class, 'aktifkan'])
+    ->name('user.aktifkan');
+
+Route::patch('/user/{user}/nonaktifkan', [UserController::class, 'nonaktifkan'])
+    ->name('user.nonaktifkan');
+
+Route::get('/user/{user}', [UserController::class, 'show'])
+    ->name('user.show');
+
+Route::get('/user/{user}/edit', [UserController::class, 'edit'])
+    ->name('user.edit');
+
+Route::put('/user/{user}', [UserController::class, 'update'])
+    ->name('user.update');
 
     Route::resource('barang', BarangController::class);
 
@@ -69,6 +86,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/laporan', [LaporanController::class, 'index'])
     ->name('laporan.index');
 });
+
+
+
+
 
 
 

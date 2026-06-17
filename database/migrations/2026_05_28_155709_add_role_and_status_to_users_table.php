@@ -12,7 +12,21 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            //
+            // tambah kolom role
+            $table->enum('role', [
+                'admin',
+                'logistik',
+                'keuangan',
+                'pimpinan'
+            ])->after('email');
+
+            //tambah kolom status
+            $table->enum('status', [
+                'pending',
+                'aktif',
+                'nonaktif'
+            ])->default('pending')->after('role');
+
         });
     }
 
@@ -22,7 +36,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            //
+            $table->dropColumn('role');
+            $table->dropColumn('status');
         });
     }
 };

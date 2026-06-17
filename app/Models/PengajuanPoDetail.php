@@ -11,6 +11,8 @@ class PengajuanPoDetail extends Model
     protected $fillable = [
         'pengajuan_po_id',
         'barang_id',
+        'harga_satuan',
+        'subtotal',
         'qty_pengajuan',
         'qty_disetujui',
         'status_item',

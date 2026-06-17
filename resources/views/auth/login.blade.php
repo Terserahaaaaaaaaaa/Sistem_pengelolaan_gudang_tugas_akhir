@@ -138,6 +138,13 @@
             <h2 class="login-title mb-2">Login</h2>
             <p class="text-muted mb-5">Masukkan email dan password untuk masuk</p>
 
+            <!--nampilin pesan dari controller yang kalo udah regiser tunggu persetujuan admin-->
+            @if(session('success'))
+                <div class="alert alert-success">
+                    {{ session('success') }}
+                </div>
+            @endif
+
             @if ($errors->any())
                 <div class="alert alert-danger">
                     {{ $errors->first() }}

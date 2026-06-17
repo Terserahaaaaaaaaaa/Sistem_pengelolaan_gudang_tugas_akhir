@@ -8,16 +8,58 @@ use Illuminate\Support\Facades\Storage;
 
 class BarangController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $barang = Barang::latest()->get();
+        $search = $request->search;
+        $namaAkun = $request->nama_akun;
 
-        return view('barang.index', compact('barang'));
+        $query = Barang::query();
+
+        // Search nama barang atau no akun
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('nama_barang', 'like', "%{$search}%")
+                ->orWhere('no_akun', 'like', "%{$search}%");
+            });
+        }
+
+        // Filter nama akun
+        if ($namaAkun) {
+            $query->where('nama_akun', $namaAkun);
+        }
+
+        //untuk menampilkan pagination 15 data
+        $barang = $query->latest()->paginate(15);
+
+        // daftar nama akun untuk dropdown
+        $akunList = Barang::select('nama_akun')
+            ->distinct()
+            ->orderBy('nama_akun')
+            ->pluck('nama_akun');
+
+        return view('barang.index', compact(
+            'barang',
+            'akunList'
+        ));
     }
 
     public function create()
     {
-        return view('barang.create');
+        $lastBarang = Barang::latest()->first();
+
+        if (!$lastBarang) {
+
+            $kodeBarang = 'BRG0001';
+
+        } else {
+
+            $lastNumber = (int) substr($lastBarang->kode_barang, 3);
+
+            $kodeBarang = 'BRG' .
+                str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
+        }
+
+        return view('barang.create', compact('kodeBarang'));
     }
 
     public function store(Request $request)
@@ -25,6 +67,7 @@ class BarangController extends Controller
         $request->validate([
             'kode_barang' => 'required|unique:barang,kode_barang',
             'nama_barang' => 'required',
+            'harga' => 'required|numeric|min:0',
             'no_akun' => 'nullable',
             'nama_akun' => 'nullable',
             'satuan' => 'nullable',
@@ -41,6 +84,7 @@ class BarangController extends Controller
         Barang::create([
             'kode_barang' => $request->kode_barang,
             'nama_barang' => $request->nama_barang,
+            'harga' => $request->harga,
             'no_akun' => $request->no_akun,
             'nama_akun' => $request->nama_akun,
             'satuan' => $request->satuan,
@@ -68,6 +112,7 @@ class BarangController extends Controller
         $request->validate([
             'kode_barang' => 'required|unique:barang,kode_barang,' . $barang->id,
             'nama_barang' => 'required',
+            'harga' => 'required|numeric|min:0',
             'no_akun' => 'nullable',
             'nama_akun' => 'nullable',
             'satuan' => 'nullable',
@@ -92,6 +137,7 @@ class BarangController extends Controller
         $barang->update([
             'kode_barang' => $request->kode_barang,
             'nama_barang' => $request->nama_barang,
+            'harga' => $request->harga,
             'no_akun' => $request->no_akun,
             'nama_akun' => $request->nama_akun,
             'satuan' => $request->satuan,

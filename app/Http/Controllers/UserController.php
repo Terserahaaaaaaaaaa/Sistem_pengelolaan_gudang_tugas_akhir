@@ -14,7 +14,7 @@ class UserController extends Controller
         return view('user.index', compact('users'));
     }
 
-    public function approve(User $user)
+    public function aktifkan(User $user)
     {
         $user->update([
             'status' => 'aktif'
@@ -22,19 +22,42 @@ class UserController extends Controller
 
         return back()->with(
             'success',
-            'User berhasil disetujui.'
+            'User berhasil diaktifkan.'
         );
     }
 
-    public function reject(User $user)
+    public function nonaktifkan(User $user)
     {
         $user->update([
-            'status' => 'ditolak'
+            'status' => 'nonaktif'
         ]);
 
         return back()->with(
             'success',
-            'User berhasil ditolak.'
+            'User berhasil dinonaktifkan.'
         );
     }
+
+    public function show(User $user)
+{
+    return view('user.show', compact('user'));
+}
+
+public function destroy(User $user)
+{
+    if ($user->role == 'admin') {
+
+        return back()->with(
+            'error',
+            'Admin tidak dapat dihapus.'
+        );
+    }
+
+    $user->delete();
+
+    return back()->with(
+        'success',
+        'User berhasil dihapus.'
+    );
+}
 }

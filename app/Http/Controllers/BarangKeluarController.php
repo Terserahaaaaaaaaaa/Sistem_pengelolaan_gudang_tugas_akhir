@@ -26,14 +26,30 @@ class BarangKeluarController extends Controller
     {
         $barang = Barang::orderBy('nama_barang')->get();
 
-        return view('barang_keluar.create', compact('barang'));
+        $tanggal = now()->format('dmy');
+
+        $jumlahHariIni = BarangKeluar::whereDate(
+            'tanggal_keluar',
+            today()
+        )->count();
+
+        $urutan = str_pad($jumlahHariIni + 1, 2, '0', STR_PAD_LEFT);
+
+        $kodeBarangKeluar = 'BK' . $tanggal . $urutan;
+
+        return view(
+            'barang_keluar.create',
+            compact(
+                'barang',
+                'kodeBarangKeluar'
+            )
+        );
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'no_barang_keluar' => 'required|unique:barang_keluar,no_barang_keluar',
-            'tanggal_keluar' => 'required|date',
+
             'divisi_tujuan' => 'required|string|max:255',
 
             'barang_id' => 'required|array',
@@ -43,11 +59,22 @@ class BarangKeluarController extends Controller
             'qty.*' => 'required|integer|min:1',
         ]);
 
-        DB::transaction(function () use ($request) {
+        $tanggal = now()->format('dmy');
+
+        $jumlahHariIni = BarangKeluar::whereDate(
+            'tanggal_keluar',
+            today()
+        )->count();
+
+        $urutan = str_pad($jumlahHariIni + 1, 2, '0', STR_PAD_LEFT);
+
+        $kodeBarangKeluar = 'BK' . $tanggal . $urutan;
+
+        DB::transaction(function () use ($request, $kodeBarangKeluar) {
 
             $barangKeluar = BarangKeluar::create([
-                'no_barang_keluar' => $request->no_barang_keluar,
-                'tanggal_keluar' => $request->tanggal_keluar,
+                'no_barang_keluar' => $kodeBarangKeluar,
+                'tanggal_keluar' => now(),
                 'divisi_tujuan' => $request->divisi_tujuan,
                 'permintaan_barang_id' => null,
                 'keterangan' => $request->keterangan,
@@ -84,8 +111,24 @@ class BarangKeluarController extends Controller
                 if ($qtyKurang > 0) {
 
                     if (!$permintaan) {
+                        $tglPermintaan = now()->format('dmy');
+
+                        $jumlahPermintaan = PermintaanBarang::whereDate(
+                            'tanggal_permintaan',
+                            today()
+                        )->count();
+
+                        $urutPermintaan = str_pad(
+                            $jumlahPermintaan + 1,
+                            2,
+                            '0',
+                            STR_PAD_LEFT
+                        );
+
+                        $kodePermintaan = 'PB' . $tglPermintaan . $urutPermintaan;
+                        
                         $permintaan = PermintaanBarang::create([
-                            'no_permintaan' => 'PM-' . time(),
+                            'no_permintaan' => $kodePermintaan,
                             'tanggal_permintaan' => now(),
                             'divisi' => $request->divisi_tujuan,
                             'keterangan' => 'Permintaan otomatis dari barang keluar karena stok tidak mencukupi.',

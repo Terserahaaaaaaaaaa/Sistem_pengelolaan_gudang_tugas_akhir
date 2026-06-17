@@ -123,7 +123,9 @@
                     <tr>
                         <th>No</th>
                         <th>Nama Barang</th>
+                        <th>Harga Satuan</th>
                         <th>Qty Pengajuan</th>
+                        <th>Subtotal</th>
                         <th>Qty Disetujui</th>
                         <th>Status Item</th>
                     </tr>
@@ -142,7 +144,15 @@
                         </td>
 
                         <td>
+                            Rp {{ number_format($detail->harga_satuan, 0, ',', '.') }}
+                        </td>
+
+                        <td>
                             {{ $detail->qty_pengajuan }}
+                        </td>
+
+                        <td>
+                            Rp {{ number_format($detail->subtotal, 0, ',', '.') }}
                         </td>
 
                         <td>
@@ -151,9 +161,21 @@
 
                         <td>
 
-                            <span class="badge bg-secondary">
-                                {{ ucfirst($detail->status_item) }}
-                            </span>
+                            @if($detail->status_item == 'pending')
+                                <span class="badge bg-warning text-dark">
+                                    Pending
+                                </span>
+
+                            @elseif($detail->status_item == 'disetujui')
+                                <span class="badge bg-success">
+                                    Disetujui
+                                </span>
+
+                            @else
+                                <span class="badge bg-danger">
+                                    Ditolak
+                                </span>
+                            @endif
 
                         </td>
 
@@ -162,7 +184,7 @@
                     @empty
 
                     <tr>
-                        <td colspan="5"
+                        <td colspan="7"
                             class="text-center text-muted">
 
                             Detail PO belum ada.
@@ -176,6 +198,19 @@
 
             </table>
 
+            @php
+                $totalPo = $pengajuanPo->detail->sum('subtotal');
+            @endphp
+
+            <div class="text-end mt-3">
+                <h5>
+                    Total PO :
+                    <strong>
+                        Rp {{ number_format($totalPo, 0, ',', '.') }}
+                    </strong>
+                </h5>
+            </div>
+            
         </div>
 
     </div>

@@ -22,17 +22,15 @@
             @csrf
 
             <div class="row">
-                <div class="col-md-4 mb-3">
+                <div class="col-md-6 mb-3">
                     <label class="form-label">No Barang Keluar</label>
-                    <input type="text" name="no_barang_keluar" class="form-control" required>
+                    <input type="text"
+                            class="form-control"
+                            value="{{ $kodeBarangKeluar }}"
+                            readonly>
                 </div>
 
-                <div class="col-md-4 mb-3">
-                    <label class="form-label">Tanggal Keluar</label>
-                    <input type="date" name="tanggal_keluar" class="form-control" required>
-                </div>
-
-                <div class="col-md-4 mb-3">
+                <div class="col-md-6 mb-3">
                     <label class="form-label">Divisi Tujuan</label>
                     <input type="text" name="divisi_tujuan" class="form-control" placeholder="Contoh: Produksi" required>
                 </div>

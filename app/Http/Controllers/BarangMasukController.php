@@ -30,19 +30,23 @@ class BarangMasukController extends Controller
             'disetujui'
         )->get();
 
-        return view(
-            'barang_masuk.create',
-            compact('pengajuanPo')
-        );
+        $tanggal = now()->format('dmy');
+
+        $jumlahHariIni = BarangMasuk::whereDate(
+            'tanggal_masuk',
+            today()
+        )->count();
+
+        $urutan = str_pad($jumlahHariIni + 1, 2, '0', STR_PAD_LEFT);
+
+        $kodeBarangMasuk = 'BM' . $tanggal . $urutan;
+
+        return view('barang_masuk.create', compact('pengajuanPo', 'kodeBarangMasuk'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'no_barang_masuk' => 'required|unique:barang_masuk,no_barang_masuk',
-
-            'tanggal_masuk' => 'required|date',
-
             // wajib pilih PO
             'pengajuan_po_id' => 'required|exists:pengajuan_po,id',
 
@@ -53,11 +57,22 @@ class BarangMasukController extends Controller
             'qty.*' => 'required|integer|min:1',
         ]);
 
-        DB::transaction(function () use ($request) {
+        $tanggal = now()->format('dmy');
+
+        $jumlahHariIni = BarangMasuk::whereDate(
+            'tanggal_masuk',
+            today()
+        )->count();
+
+        $urutan = str_pad($jumlahHariIni + 1, 2, '0', STR_PAD_LEFT);
+
+        $kodeBarangMasuk = 'BM' . $tanggal . $urutan;
+
+        DB::transaction(function () use ($request, $kodeBarangMasuk) {
 
             $barangMasuk = BarangMasuk::create([
-                'no_barang_masuk' => $request->no_barang_masuk,
-                'tanggal_masuk' => $request->tanggal_masuk,
+                'no_barang_masuk' => $kodeBarangMasuk,
+                'tanggal_masuk' => now(),
                 'pengajuan_po_id' => $request->pengajuan_po_id,
                 'keterangan' => $request->keterangan,
                 'dicatat_oleh' => Auth::id(),

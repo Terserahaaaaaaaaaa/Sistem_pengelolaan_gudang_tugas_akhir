@@ -22,75 +22,95 @@
           <span class="nav-text">Dashboard</span>
         </a>
 
-        <a class="nav-link" href="users.html">
-          <span class="nav-icon"><i class="bi bi-people" aria-hidden="true"></i></span>
-          <span class="nav-text">Users</span>
-        </a>
+        @if(Auth::user()->role == 'admin')
+        <li class="nav-item">
+            <a href="{{ route('user.index') }}" class="nav-link">
+                <i class="bi bi-people-fill"></i>
+                <span>Data User</span>
+            </a>
+        </li>
+        @endif
 
+        @if(in_array(Auth::user()->role, ['admin', 'logistik']))
          <a class="nav-link {{ request()->routeIs('barang.*') ? 'active' : '' }}" href="{{ route('barang.index') }}">
             <span class="nav-icon">
                 <i class="bi bi-box-seam"></i>
             </span>
             <span class="nav-text">Barang</span>
         </a>
+        @endif
 
+        @if(in_array(Auth::user()->role, ['admin', 'keuangan', 'logistik']))
         <a class="nav-link {{ request()->routeIs('stok-barang.*') ? 'active' : '' }}" href="{{ route('stok-barang.index') }}">
             <span class="nav-icon">
                 <i class="bi bi-boxes"></i>
             </span>
             <span class="nav-text">Stok Barang</span>
         </a>
+        @endif
 
+        @if(Auth::user()->role == 'logistik')
         <a class="nav-link {{ request()->routeIs('barang-masuk.*') ? 'active' : '' }}" href="{{ route('barang-masuk.index') }}">
             <span class="nav-icon">
                 <i class="bi bi-box-arrow-in-down"></i>
             </span>
             <span class="nav-text">Barang Masuk</span>
         </a>
+        @endif
 
+        @if(Auth::user()->role == 'logistik')
         <a class="nav-link {{ request()->routeIs('barang-keluar.*') ? 'active' : '' }}" href="{{ route('barang-keluar.index') }}">
             <span class="nav-icon">
                 <i class="bi bi-box-arrow-up"></i>
             </span>
             <span class="nav-text">Barang Keluar</span>
         </a>
+        @endif
 
+        @if(Auth::user()->role == 'logistik')
         <a class="nav-link {{ request()->routeIs('permintaan-barang.*') ? 'active' : '' }} "href="{{ route('permintaan-barang.index') }}">
             <span class="nav-icon">
                 <i class="bi bi-clipboard-check"></i>
             </span>
             <span class="nav-text">Permintaan Barang</span>
         </a>
+        @endif
 
+        @if(Auth::user()->role == 'admin')
         <a class="nav-link {{ request()->routeIs('pengajuan-po.*') ? 'active' : '' }}" href="{{ route('pengajuan-po.index') }}">
             <span class="nav-icon">
                 <i class="bi bi-file-earmark-text"></i>
             </span>
             <span class="nav-text">Pengajuan PO</span>
         </a>
+        @endif
 
+        @if(Auth::user()->role == 'keuangan')
         <a class="nav-link {{ request()->routeIs('approval_po.*') ? 'active' : '' }}" href="{{ route('approval_po.index') }}">
             <span class="nav-icon">
                 <i class="bi bi-file-earmark-text"></i>
             </span>
-            <span class="nav-text">Data Pengajuan PO</span>
+            <span class="nav-text">Approval PO</span>
         </a>
+        @endif
         
+        @if(in_array(Auth::user()->role, ['admin', 'keuangan', 'pimpinan']))
         <a class="nav-link {{ request()->routeIs('laporan.*') ? 'active' : '' }}" href="{{ route('laporan.index') }}">
             <span class="nav-icon">
                 <i class="bi bi-file-bar-graph"></i>
             </span>
             <span class="nav-text">Laporan</span>
         </a>
+        @endif
 
-        {{-- @if(auth()->user()->role == 'admin_gudang') --}}
+        @if(auth()->user()->role == 'admin')
         <a class="nav-link {{ request()->routeIs('daftar-permintaan.*') ? 'active' : '' }} "href="{{ route('daftar-permintaan.admin_index') }}">
             <span class="nav-icon">
                 <i class="bi bi-inbox"></i>
             </span>
             <span class="nav-text">Permintaan Masuk</span>
         </a>
-        {{-- @endif --}}
+        @endif
       </nav>
 
       <div class="sidebar-user">

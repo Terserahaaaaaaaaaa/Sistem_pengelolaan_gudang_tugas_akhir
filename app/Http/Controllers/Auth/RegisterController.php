@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
 
 class RegisterController extends Controller
 {
@@ -47,9 +48,11 @@ class RegisterController extends Controller
      */
     protected function validator(array $data)
     {
+        // disini status karena yang validasi status sistemnya otomatis bukan nginputin
         return Validator::make($data, [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'role' => ['required', 'in:logistik,keuangan'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
     }
@@ -64,7 +67,19 @@ class RegisterController extends Controller
         return User::create([
             'name' => $data['name'],
             'email' => $data['email'],
+            'role' => $data['role'],
+            'status' => 'pending',
             'password' => Hash::make($data['password']),
         ]);
+    }
+
+    //ini buat kalo akun baru register ngga langsung dibawa ke dashboard, munculin pesan dulu kalo nunggu persetujuan admin
+    protected function registered($request, $user)
+    {
+        Auth::logout();
+
+        return redirect()
+            ->route('login')
+            ->with('success', 'Registrasi berhasil. Menunggu persetujuan admin.');
     }
 }

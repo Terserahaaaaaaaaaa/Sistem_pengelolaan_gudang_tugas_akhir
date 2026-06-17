@@ -28,11 +28,12 @@
 
             <div class="mb-3">
                 <label class="form-label">Kode Barang</label>
-                <input type="text" name="kode_barang" class="form-control @error('kode_barang') is-invalid @enderror"
-                       value="{{ old('kode_barang') }}" placeholder="Contoh: BRG001">
-                @error('kode_barang')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
+
+                <input type="text"
+                    name="kode_barang"
+                    class="form-control"
+                    value="{{ $kodeBarang }}"
+                    readonly>
             </div>
 
             <div class="mb-3">
@@ -42,6 +43,17 @@
                 @error('nama_barang')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Harga Barang</label>
+                <input type="number"
+                    name="harga"
+                    class="form-control"
+                    value="{{ old('harga') }}"
+                    min="0"
+                    placeholder="Masukkan harga barang"
+                    required>
             </div>
 
             <div class="row">

@@ -14,10 +14,6 @@
     </a>
 </div>
 
-<br>
-
-<br>
-
 <!--untuk  menampilkan peringatan barang berhasil dihapus-->
 @if(session('success'))
     <div class="alert alert-success">
@@ -32,6 +28,48 @@
     </div>
 @endif
 
+<form method="GET" action="{{ route('barang.index') }}">
+    <div class="row mb-3">
+
+        {{-- Search --}}
+        <div class="col-md-5">
+            <input type="text"
+                   name="search"
+                   class="form-control"
+                   placeholder="Cari nama barang atau no akun..."
+                   value="{{ request('search') }}">
+        </div>
+
+        {{-- Filter Nama Akun --}}
+        <div class="col-md-4">
+            <select name="nama_akun" class="form-select">
+                <option value="">-- Semua Nama Akun --</option>
+
+                @foreach($akunList as $akun)
+                    <option value="{{ $akun }}"
+                        {{ request('nama_akun') == $akun ? 'selected' : '' }}>
+                        {{ $akun }}
+                    </option>
+                @endforeach
+
+            </select>
+        </div>
+
+        {{-- Tombol --}}
+        <div class="col-md-3">
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-search"></i> Cari
+            </button>
+
+            <a href="{{ route('barang.index') }}"
+               class="btn btn-secondary">
+                Reset
+            </a>
+        </div>
+
+    </div>
+</form>
+
 <div class="card border-0 shadow-sm">
     <div class="card-body">
         <div class="table-responsive">
@@ -42,6 +80,8 @@
                         <th>Foto</th>
                         <th>Kode Barang</th>
                         <th>Nama Barang</th>
+                        <th>Harga</th>
+                        <th>Satuan</th>
                         <th>No Akun</th>
                         <th>Nama Akun</th>
                         <th width="180">Aksi</th>
@@ -53,7 +93,10 @@
                     <tr>
 
                         {{-- nomor --}}
-                        <td>{{ $loop->iteration }}</td>
+                        <td>
+                            {{ ($barang->currentPage() - 1) * $barang->perPage() + $loop->iteration }}
+                        </td>
+
 
                         {{-- foto --}}
                         <td>
@@ -71,6 +114,10 @@
 
                         <td>{{ $item->kode_barang }}</td>
                         <td>{{ $item->nama_barang }}</td>
+                        <td>
+                            Rp {{ number_format($item->harga, 0, ',', '.') }}
+                        </td>
+                        <td>{{ $item->satuan ?? '-' }}</td>
                         <td>{{ $item->no_akun ?? '-' }}</td>
                         <td>{{ $item->nama_akun ?? '-' }}</td>
 
@@ -123,4 +170,9 @@
         </div>
     </div>
 </div>
+<div class="d-flex justify-content-center mt-4">
+    <!--biar searchnya ngga hilang pake ini appends(request()->query())->-->
+{{ $barang->appends(request()->query())->links() }}
+</div>
+
 @endsection

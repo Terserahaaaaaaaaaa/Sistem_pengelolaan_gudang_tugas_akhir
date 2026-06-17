@@ -84,12 +84,22 @@ class PengajuanPoController extends Controller
 
             foreach ($request->barang_id as $index => $barangId) {
 
+                $barang = Barang::findOrFail($barangId);
+
+                $harga = $barang->harga;
+
+                $qty = $request->qty_pengajuan[$index];
+
                 PengajuanPoDetail::create([
 
                     'pengajuan_po_id' => $po->id,
                     'barang_id' => $barangId,
 
-                    'qty_pengajuan' => $request->qty_pengajuan[$index],
+                    'harga_satuan' => $harga,
+
+                    'subtotal' => $harga * $qty,
+
+                    'qty_pengajuan' => $qty,
 
                     'qty_disetujui' => 0,
 
@@ -107,7 +117,7 @@ class PengajuanPoController extends Controller
                 if ($permintaan) {
 
                     $permintaan->update([
-                        'status_permintaan' => 'diproses'
+                        'status_permintaan' => 'diajukan_po'
                     ]);
                 }
             }
@@ -206,11 +216,11 @@ class PengajuanPoController extends Controller
 
                 'status_permintaan' => match($statusPo) {
 
-                    'disetujui' => 'disetujui',
+                    'disetujui' => 'terpenuhi',
 
-                    'ditolak' => 'ditolak',
+                    'ditolak' => 'tidak_terpenuhi',
 
-                    default => 'diproses',
+                    default => 'diajukan_po',
 
                 }
 

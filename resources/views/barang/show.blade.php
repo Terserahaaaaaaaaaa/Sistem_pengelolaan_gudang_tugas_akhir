@@ -50,6 +50,13 @@
                     </tr>
 
                     <tr>
+                        <th>Harga Barang</th>
+                        <td>
+                            Rp {{ number_format($barang->harga, 0, ',', '.') }}
+                        </td>
+                    </tr>
+
+                    <tr>
                         <th>No Akun</th>
                         <td>{{ $barang->no_akun ?? '-' }}</td>
                     </tr>

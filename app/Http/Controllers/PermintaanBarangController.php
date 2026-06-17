@@ -7,6 +7,7 @@ use App\Models\PermintaanBarang;
 use App\Models\PermintaanDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class PermintaanBarangController extends Controller
 {
@@ -21,16 +22,33 @@ class PermintaanBarangController extends Controller
 
     public function create()
     {
-        $barang = Barang::orderBy('nama_barang')->get();
+        $barang = Barang::all();
 
-        return view('permintaan_barang.create', compact('barang'));
+        $tanggal = now()->format('dmy');
+
+        $last = PermintaanBarang::whereDate(
+            'created_at',
+            today()
+        )->count();
+
+        $nomor = str_pad($last + 1, 2, '0', STR_PAD_LEFT);
+
+        $kodePermintaan = 'PB' . $tanggal . $nomor;
+
+        return view(
+            'permintaan_barang.create',
+            compact(
+                'barang',
+                'kodePermintaan'
+            )
+        );
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'no_permintaan' => 'required|unique:permintaan_barang,no_permintaan',
-            'tanggal_permintaan' => 'required|date',
+            // 'no_permintaan' => 'required|unique:permintaan_barang,no_permintaan',
+            // 'tanggal_permintaan' => 'required|date',
             'divisi' => 'required|string|max:255',
             'keterangan' => 'nullable',
 
@@ -41,10 +59,22 @@ class PermintaanBarangController extends Controller
             'qty.*' => 'required|integer|min:1',
         ]);
 
-        DB::transaction(function () use ($request) {
+        $tanggal = now()->format('dmy');
+
+        $jumlahHariIni = PermintaanBarang::whereDate(
+            'tanggal_permintaan',
+            today()
+        )->count();
+
+        $urutan = str_pad($jumlahHariIni + 1, 2, '0', STR_PAD_LEFT);
+
+        $kodePermintaan = 'PB' . $tanggal . $urutan;
+
+        DB::transaction(function () use ($request, $kodePermintaan) {
+
             $permintaan = PermintaanBarang::create([
-                'no_permintaan' => $request->no_permintaan,
-                'tanggal_permintaan' => $request->tanggal_permintaan,
+                'no_permintaan' => $kodePermintaan,
+                'tanggal_permintaan' => now(),
                 'divisi' => $request->divisi,
                 'keterangan' => $request->keterangan,
                 'status_permintaan' => 'baru',

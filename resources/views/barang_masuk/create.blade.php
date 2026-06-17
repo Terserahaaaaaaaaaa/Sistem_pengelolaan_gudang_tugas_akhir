@@ -29,19 +29,13 @@
                     <input type="text"
                            name="no_barang_masuk"
                            class="form-control"
-                           required>
+                           value="{{ $kodeBarangMasuk }}"
+                           readonly>
                 </div>
 
-                <div class="col-md-4 mb-3">
-                    <label class="form-label">
-                        Tanggal Masuk
-                    </label>
-
-                    <input type="date"
-                           name="tanggal_masuk"
-                           class="form-control"
-                           required>
-                </div>
+                <input type="hidden"
+                        name="tanggal_masuk"
+                        value="{{ now()->format('Y-m-d') }}">
 
                 <div class="col-md-4 mb-3">
                     <label class="form-label">

@@ -9,6 +9,7 @@ use App\Models\PengajuanPo;
 use App\Models\PermintaanBarang;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class HomeController extends Controller
 {
@@ -29,6 +30,30 @@ class HomeController extends Controller
      */
     
     public function index()
+    {
+        if(Auth::user()->role == 'admin'){
+            return $this->dashboardAdmin();
+        }
+
+        if(Auth::user()->role == 'logistik'){
+            // return view('dashboard.logistik');
+            return $this->dashboardLogistik();
+        }
+
+        if(Auth::user()->role == 'keuangan'){
+            // return view('dashboard.keuangan');
+            return $this->dashboardKeuangan();
+            
+        }
+
+        if(Auth::user()->role == 'pimpinan'){
+            // return view('dashboard.pimpinan');
+            return $this->dashboardPimpinan();
+        }
+    }
+
+
+    public function dashboardAdmin()
     {
         $totalPo = PengajuanPo::count();
 
@@ -126,6 +151,162 @@ class HomeController extends Controller
             'dataKeluar',
             'stokMenipis',
             'aktivitas'
+        ));
+    }
+
+    public function dashboardLogistik()
+    {
+        $totalPermintaan = PermintaanBarang::count();
+
+        $totalBarangMasuk = BarangMasuk::count();
+
+        $totalBarangKeluar = BarangKeluar::count();
+
+        $permintaanBelumTerpenuhi = PermintaanBarang::whereIn(
+            'status_permintaan',
+            ['baru', 'diajukan_po']
+        )->count();
+
+        $permintaanTerbaru = PermintaanBarang::latest()
+            ->take(5)
+            ->get();
+
+        // Grafik Barang Masuk
+        $barangMasukBulanan = BarangMasuk::selectRaw('MONTH(tanggal_masuk) as bulan, COUNT(*) as total')
+            ->groupBy('bulan')
+            ->pluck('total', 'bulan');
+
+        // Grafik Barang Keluar
+        $barangKeluarBulanan = BarangKeluar::selectRaw('MONTH(tanggal_keluar) as bulan, COUNT(*) as total')
+            ->groupBy('bulan')
+            ->pluck('total', 'bulan');
+
+        $dataMasuk = [];
+        $dataKeluar = [];
+
+        for ($i = 1; $i <= 12; $i++) {
+            $dataMasuk[] = $barangMasukBulanan[$i] ?? 0;
+            $dataKeluar[] = $barangKeluarBulanan[$i] ?? 0;
+        }
+
+        $aktivitasMasuk = BarangMasuk::latest()->take(5)->get()
+            ->map(function ($item) {
+                return [
+                    'jenis' => 'Barang Masuk',
+                    'detail' => $item->no_barang_masuk,
+                    'tanggal' => $item->created_at
+                ];
+            });
+
+        $aktivitasKeluar = BarangKeluar::latest()->take(5)->get()
+            ->map(function ($item) {
+                return [
+                    'jenis' => 'Barang Keluar',
+                    'detail' => $item->no_barang_keluar,
+                    'tanggal' => $item->created_at
+                ];
+            });
+
+        $aktivitasPermintaan = PermintaanBarang::latest()->take(5)->get()
+            ->map(function ($item) {
+                return [
+                    'jenis' => 'Permintaan Barang',
+                    'detail' => $item->no_permintaan,
+                    'tanggal' => $item->created_at
+                ];
+            });
+
+        $aktivitas = $aktivitasMasuk
+            ->concat($aktivitasKeluar)
+            ->concat($aktivitasPermintaan)
+            ->sortByDesc('tanggal')
+            ->take(10);
+
+        return view('dashboard.logistik', compact(
+            'totalPermintaan',
+            'totalBarangMasuk',
+            'totalBarangKeluar',
+            'permintaanBelumTerpenuhi',
+            'permintaanTerbaru',
+            'dataMasuk',
+            'dataKeluar',
+            'aktivitas'
+        ));
+    }
+
+    public function dashboardKeuangan()
+    {
+        $poPending = PengajuanPo::where('status_po', 'pending')->count();
+
+        $poDisetujui = PengajuanPo::where('status_po', 'disetujui')->count();
+
+        $poDitolak = PengajuanPo::where('status_po', 'ditolak')->count();
+
+        $totalPo = PengajuanPo::count();
+
+        $poPendingList = PengajuanPo::where('status_po', 'pending')
+            ->latest()
+            ->take(5)
+            ->get();
+
+        $aktivitas = PengajuanPo::latest()
+            ->take(10)
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'jenis' => 'Pengajuan PO',
+                    'detail' => $item->no_po,
+                    'tanggal' => $item->created_at
+                ];
+            });
+
+        return view('dashboard.keuangan', compact(
+            'poPending',
+            'poDisetujui',
+            'poDitolak',
+            'totalPo',
+            'poPendingList',
+            'aktivitas'
+        ));
+    }
+
+    public function dashboardPimpinan()
+    {
+        $totalBarang = Barang::count();
+
+        $totalPermintaan = PermintaanBarang::count();
+
+        $totalBarangMasuk = BarangMasuk::count();
+
+        $totalBarangKeluar = BarangKeluar::count();
+
+        $totalPo = PengajuanPo::count();
+
+        // Grafik
+        $barangMasukBulanan = BarangMasuk::selectRaw('MONTH(tanggal_masuk) as bulan, COUNT(*) as total')
+            ->groupBy('bulan')
+            ->pluck('total', 'bulan');
+
+        $barangKeluarBulanan = BarangKeluar::selectRaw('MONTH(tanggal_keluar) as bulan, COUNT(*) as total')
+            ->groupBy('bulan')
+            ->pluck('total', 'bulan');
+
+        $dataMasuk = [];
+        $dataKeluar = [];
+
+        for ($i = 1; $i <= 12; $i++) {
+            $dataMasuk[] = $barangMasukBulanan[$i] ?? 0;
+            $dataKeluar[] = $barangKeluarBulanan[$i] ?? 0;
+        }
+
+        return view('dashboard.pimpinan', compact(
+            'totalBarang',
+            'totalPermintaan',
+            'totalBarangMasuk',
+            'totalBarangKeluar',
+            'totalPo',
+            'dataMasuk',
+            'dataKeluar'
         ));
     }
 }

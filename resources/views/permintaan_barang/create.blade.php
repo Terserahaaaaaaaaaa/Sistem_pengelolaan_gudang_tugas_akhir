@@ -16,13 +16,18 @@
             <div class="row">
                 <div class="col-md-4 mb-3">
                     <label class="form-label">No Permintaan</label>
-                    <input type="text" name="no_permintaan" class="form-control" required>
+                    <input type="text"
+                            name="no_permintaan"
+                            class="form-control" 
+                            value="{{ $kodePermintaan }}"
+                            readonly>
                 </div>
 
-                <div class="col-md-4 mb-3">
-                    <label class="form-label">Tanggal Permintaan</label>
-                    <input type="date" name="tanggal_permintaan" class="form-control" required>
-                </div>
+                <input type="hidden"
+                        name="tanggal_permintaan" 
+                        value="{{ now()->format('Y-m-d') }}">
+
+            </div>
 
                 <div class="col-md-4 mb-3">
                     <label class="form-label">Divisi</label>
