@@ -8,6 +8,7 @@ use App\Models\PermintaanDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class PermintaanBarangController extends Controller
 {
@@ -22,6 +23,11 @@ class PermintaanBarangController extends Controller
 
     public function create()
     {
+        //create hanya bisa dilakukan oleh logistik
+        if(Auth::user()->role != 'logistik'){
+            abort(403);
+        }
+        
         $barang = Barang::all();
 
         $tanggal = now()->format('dmy');
@@ -46,6 +52,11 @@ class PermintaanBarangController extends Controller
 
     public function store(Request $request)
     {
+        //store hanya bisa dilakukan logistik
+        if(Auth::user()->role != 'logistik'){
+            abort(403);
+        }
+
         $request->validate([
             // 'no_permintaan' => 'required|unique:permintaan_barang,no_permintaan',
             // 'tanggal_permintaan' => 'required|date',
@@ -104,19 +115,24 @@ class PermintaanBarangController extends Controller
 
     public function destroy(PermintaanBarang $permintaanBarang)
     {
+        //hapus hanya bisa dilakukan oleh logistik
+        if(Auth::user()->role != 'logistik'){
+            abort(403);
+        }
+
         $permintaanBarang->delete();
 
         return redirect()->route('permintaan-barang.index')
             ->with('success', 'Data permintaan barang berhasil dihapus.');
     }
 
-    public function daftarAdmin()
-    {
-        $permintaanBarang = PermintaanBarang::with('detail.barang')
-            ->whereIn('status_permintaan', ['baru', 'tidak_terpenuhi'])
-            ->latest()
-            ->get();
+    // public function daftarAdmin()
+    // {
+    //     $permintaanBarang = PermintaanBarang::with('detail.barang')
+    //         ->whereIn('status_permintaan', ['baru', 'tidak_terpenuhi'])
+    //         ->latest()
+    //         ->get();
 
-        return view('daftar_permintaan.admin_index', compact('permintaanBarang'));
-    }
+    //     return view('daftar_permintaan.admin_index', compact('permintaanBarang'));
+    // }
 }

@@ -1,3 +1,6 @@
+<h1 style="color:red">
+SHOW.BLADE.PHP
+</h1>
 @extends('layouts.template')
 
 @section('content')
@@ -217,4 +220,101 @@
 
 </div>
 
+@if(Auth::user()->role == 'keuangan' && $pengajuanPo->status_po == 'pending')
+
+<form action="{{ route('pengajuan-po.approve', $pengajuanPo->id) }}"
+      method="POST">
+
+    @csrf
+
+    <div class="card border-0 shadow-sm mt-4">
+
+        <div class="card-body">
+
+            <h5 class="mb-3">
+                Form Approval
+            </h5>
+
+            <table class="table table-bordered">
+
+                <thead>
+                    <tr>
+                        <th>Barang</th>
+                        <th>Qty Pengajuan</th>
+                        <th>Status</th>
+                        <th>Qty Disetujui</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    @foreach($pengajuanPo->detail as $detail)
+
+                    <tr>
+
+                        <td>
+                            {{ $detail->barang->nama_barang }}
+                        </td>
+
+                        <td>
+                            {{ $detail->qty_pengajuan }}
+                        </td>
+
+                        <td>
+
+                            <select
+                                name="status_item[{{ $detail->id }}]"
+                                class="form-select">
+
+                                <option value="disetujui">
+                                    Disetujui
+                                </option>
+
+                                <option value="ditolak">
+                                    Ditolak
+                                </option>
+
+                            </select>
+
+                        </td>
+
+                        <td>
+
+                            <input
+                                type="number"
+                                name="qty_disetujui[{{ $detail->id }}]"
+                                value="{{ $detail->qty_pengajuan }}"
+                                min="0"
+                                max="{{ $detail->qty_pengajuan }}"
+                                class="form-control">
+
+                        </td>
+
+                    </tr>
+
+                    @endforeach
+
+                </tbody>
+
+            </table>
+
+            <div class="text-end">
+
+                <button type="submit"
+                        class="btn btn-success">
+
+                    <i class="bi bi-check-circle-fill"></i>
+                    Simpan Approval
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</form>
+
+@endif
 @endsection

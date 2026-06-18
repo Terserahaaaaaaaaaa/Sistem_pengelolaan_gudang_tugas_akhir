@@ -27,7 +27,7 @@ class PengajuanPo extends Model
 
     public function barangMasuk()
     {
-        return $this->hasMany(BarangMasuk::class);
+        return $this->hasOne(BarangMasuk::class, 'pengajuan_po_id');
     }
 
     public function pembuat()

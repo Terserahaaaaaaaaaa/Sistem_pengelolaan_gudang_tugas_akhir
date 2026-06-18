@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Barang;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class BarangController extends Controller
@@ -45,6 +46,11 @@ class BarangController extends Controller
 
     public function create()
     {
+        //create hanya bisa dilakukan admin
+        if(Auth::user()->role != 'admin'){
+            abort(403);
+        }
+        
         $lastBarang = Barang::latest()->first();
 
         if (!$lastBarang) {
@@ -64,6 +70,11 @@ class BarangController extends Controller
 
     public function store(Request $request)
     {
+        //store hanya bisa dilakukan admin
+        if(Auth::user()->role != 'admin'){
+            abort(403);
+        }
+
         $request->validate([
             'kode_barang' => 'required|unique:barang,kode_barang',
             'nama_barang' => 'required',

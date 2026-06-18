@@ -10,11 +10,13 @@
         </p>
     </div>
 
-    <a href="{{ route('pengajuan-po.create') }}"
-       class="btn btn-primary">
-        <i class="bi bi-plus-circle"></i>
-        Buat PO
-    </a>
+    @if(Auth::user()->role == 'admin')
+        <a href="{{ route('pengajuan-po.create') }}"
+        class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i>
+            Buat PO
+        </a>
+    @endif
 </div>
 
 @if(session('success'))
@@ -94,19 +96,31 @@
                                 <i class="bi bi-eye-fill"></i>
                             </a>
 
-                            <form action="{{ route('pengajuan-po.destroy', $item->id) }}"
-                                  method="POST"
-                                  class="d-inline"
-                                  onsubmit="return confirm('Yakin ingin menghapus PO ini?')">
+                            @if(Auth::user()->role == 'admin')
+                                <form action="{{ route('pengajuan-po.destroy', $item->id) }}"
+                                    method="POST"
+                                    class="d-inline"
+                                    onsubmit="return confirm('Yakin ingin menghapus PO ini?')">
 
-                                @csrf
-                                @method('DELETE')
+                                    @csrf
+                                    @method('DELETE')
 
-                                <button class="btn btn-danger btn-sm">
-                                    <i class="bi bi-trash-fill"></i>
-                                </button>
+                                    <button class="btn btn-danger btn-sm">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </button>
 
-                            </form>
+                                </form>
+                            @endif
+
+                            @if(Auth::user()->role == 'keuangan' && $item->status_po == 'pending')
+                                <a href="{{ route('pengajuan-po.show', $item->id) }}"
+                                class="btn btn-success btn-sm"
+                                title="Approval">
+
+                                    <i class="bi bi-check-circle-fill"></i>
+
+                                </a>
+                            @endif
 
                         </td>
 

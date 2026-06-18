@@ -24,6 +24,11 @@ class BarangKeluarController extends Controller
 
     public function create()
     {
+        //create hanya bisa dilakukan oleh logistik
+        if(Auth::user()->role != 'logistik'){
+            abort(403);
+        }
+
         $barang = Barang::orderBy('nama_barang')->get();
 
         $tanggal = now()->format('dmy');
@@ -48,6 +53,11 @@ class BarangKeluarController extends Controller
 
     public function store(Request $request)
     {
+        //store hanya bisa dilakukan logistik
+        if(Auth::user()->role != 'logistik'){
+            abort(403);
+        }
+        
         $request->validate([
 
             'divisi_tujuan' => 'required|string|max:255',
@@ -168,6 +178,11 @@ class BarangKeluarController extends Controller
 
     public function destroy(BarangKeluar $barangKeluar)
     {
+        //hapus hanya bisa dilakukan oleh logistik
+        if(Auth::user()->role != 'logistik'){
+            abort(403);
+        }
+
         $barangKeluar->delete();
 
         return redirect()->route('barang-keluar.index')

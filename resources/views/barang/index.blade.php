@@ -9,9 +9,11 @@
         <p class="text-muted mb-0">Kelola data barang perlengkapan produksi.</p>
     </div>
 
-    <a href="{{ route('barang.create') }}" class="btn btn-primary">
-        <i class="bi bi-plus-circle"></i> Tambah Barang
-    </a>
+    @if(Auth::user()->role == 'admin')
+        <a href="{{ route('barang.create') }}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Tambah Barang
+        </a>
+    @endif
 </div>
 
 <!--untuk  menampilkan peringatan barang berhasil dihapus-->
@@ -132,28 +134,32 @@
     </a>
 
     {{-- edit --}}
-    <a href="{{ route('barang.edit', $item->id) }}"
-       class="btn btn-warning btn-sm"
-       title="Edit">
+    @if(Auth::user()->role == 'admin')
+        <a href="{{ route('barang.edit', $item->id) }}"
+        class="btn btn-warning btn-sm"
+        title="Edit">
 
-        <i class="bi bi-pencil-square"></i>
-    </a>
+            <i class="bi bi-pencil-square"></i>
+        </a>
+    @endif
 
     {{-- hapus --}}
-    <form action="{{ route('barang.destroy', $item->id) }}"
-          method="POST"
-          class="d-inline"
-          onsubmit="return confirm('Yakin ingin menghapus barang ini?')">
+    @if(Auth::user()->role == 'admin')
+        <form action="{{ route('barang.destroy', $item->id) }}"
+            method="POST"
+            class="d-inline"
+            onsubmit="return confirm('Yakin ingin menghapus barang ini?')">
 
-        @csrf
-        @method('DELETE')
+            @csrf
+            @method('DELETE')
 
-        <button class="btn btn-danger btn-sm"
-                title="Hapus">
+            <button class="btn btn-danger btn-sm"
+                    title="Hapus">
 
-            <i class="bi bi-trash-fill"></i>
-        </button>
-    </form>
+                <i class="bi bi-trash-fill"></i>
+            </button>
+        </form>
+    @endif
 </td>
 
                     </tr>

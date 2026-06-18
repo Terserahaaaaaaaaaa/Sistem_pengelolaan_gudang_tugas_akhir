@@ -12,12 +12,14 @@
         </p>
     </div>
 
-    <a href="{{ route('barang-masuk.create') }}"
-       class="btn btn-primary">
+    @if(Auth::user()->role == 'logistik')
+        <a href="{{ route('barang-masuk.create') }}"
+        class="btn btn-primary">
 
-        <i class="bi bi-plus-circle"></i>
-        Tambah Barang Masuk
-    </a>
+            <i class="bi bi-plus-circle"></i>
+            Tambah Barang Masuk
+        </a>
+    @endif
 </div>
 
 @if(session('success'))
@@ -70,18 +72,20 @@
                                 <i class="bi bi-eye-fill"></i>
                             </a>
 
-                            <form action="{{ route('barang-masuk.destroy', $item->id) }}"
-                                  method="POST"
-                                  class="d-inline"
-                                  onsubmit="return confirm('Yakin ingin menghapus data ini?')">
+                            @if(Auth::user()->role == 'logistik')
+                                <form action="{{ route('barang-masuk.destroy', $item->id) }}"
+                                    method="POST"
+                                    class="d-inline"
+                                    onsubmit="return confirm('Yakin ingin menghapus data ini?')">
 
-                                @csrf
-                                @method('DELETE')
+                                    @csrf
+                                    @method('DELETE')
 
-                                <button class="btn btn-danger btn-sm">
-                                    <i class="bi bi-trash-fill"></i>
-                                </button>
-                            </form>
+                                    <button class="btn btn-danger btn-sm">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </button>
+                                </form>
+                            @endif
 
                         </td>
 

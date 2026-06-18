@@ -22,37 +22,55 @@ class PengajuanPoController extends Controller
         return view('pengajuan_po.index', compact('pengajuanPo'));
     }
 
-    // public function create()
-    // {
-    //     $barang = Barang::orderBy('nama_barang')->get();
-
-    //     return view('pengajuan_po.create', compact('barang'));
-    // }
-
     public function create(Request $request)
     {
+        //create hanya bisa dilakukan admin
+        if(Auth::user()->role != 'admin'){
+            abort(403);
+        }
+
         $barang = Barang::orderBy('nama_barang')->get();
 
         $permintaan = null;
 
-        // ini jika kita klik buat po dari halaman permintaan barang maka data otomatis teriisi di form
         if ($request->permintaan_id) {
 
             $permintaan = PermintaanBarang::with('detail.barang')
                 ->findOrFail($request->permintaan_id);
         }
 
+        $tanggal = now()->format('dmy');
+
+        $jumlahHariIni = PengajuanPo::whereDate(
+            'tanggal_po',
+            today()
+        )->count();
+
+        $urutan = str_pad(
+            $jumlahHariIni + 1,
+            2,
+            '0',
+            STR_PAD_LEFT
+        );
+
+        $noPo = 'PO' . $tanggal . $urutan;
+
         return view('pengajuan_po.create', compact(
             'barang',
-            'permintaan'
+            'permintaan',
+            'noPo'
         ));
     }
 
     public function store(Request $request)
     {
+        //store hanya bisa dilakukan admin
+        if(Auth::user()->role != 'admin'){
+            abort(403);
+        }
+
         $request->validate([
             'no_po' => 'required|unique:pengajuan_po,no_po',
-            'tanggal_po' => 'required|date',
             'sumber_po' => 'required',
             'kontak_pembelian' => 'nullable',
             'metode_pembelian' => 'nullable',
@@ -71,7 +89,7 @@ class PengajuanPoController extends Controller
                 'permintaan_barang_id' => $request->permintaan_barang_id,
 
                 'no_po' => $request->no_po,
-                'tanggal_po' => $request->tanggal_po,
+                'tanggal_po' => now(),
                 'sumber_po' => $request->sumber_po,
                 'kontak_pembelian' => $request->kontak_pembelian,
                 'metode_pembelian' => $request->metode_pembelian,
@@ -110,7 +128,7 @@ class PengajuanPoController extends Controller
             // UPDATE STATUS PERMINTAAN
             if ($request->permintaan_barang_id) {
 
-                $permintaan = \App\Models\PermintaanBarang::find(
+                $permintaan = PermintaanBarang::find(
                     $request->permintaan_barang_id
                 );
 
@@ -131,13 +149,29 @@ class PengajuanPoController extends Controller
 
     public function show(PengajuanPo $pengajuanPo)
     {
-        $pengajuanPo->load(['detail.barang', 'pembuat', 'penyetuju']);
+        $pengajuanPo->load([
+            'detail.barang',
+            'pembuat',
+            'penyetuju'
+        ]);
+
+        if(
+            Auth::user()->role == 'keuangan' &&
+            $pengajuanPo->status_po == 'pending'
+        ){
+            return view('pengajuan_po.approve', compact('pengajuanPo'));
+        }
 
         return view('pengajuan_po.show', compact('pengajuanPo'));
     }
 
     public function destroy(PengajuanPo $pengajuanPo)
     {
+        //hapus hanya bisa dilakukan admin
+        if(Auth::user()->role != 'admin'){
+            abort(403);
+        }
+
         $pengajuanPo->delete();
 
         return redirect()
@@ -146,28 +180,13 @@ class PengajuanPoController extends Controller
     }
 
     //KEUANGAN
-    public function approvalindex()
-    {
-        $pengajuanPo = PengajuanPo::with(['pembuat'])
-            ->latest()
-            ->get();
-
-        return view('approval_po.index', compact('pengajuanPo'));
-    }
-
-    public function approvalShow(PengajuanPo $pengajuanPo)
-    {
-        $pengajuanPo->load([
-            'detail.barang',
-            'pembuat',
-            'penyetuju'
-        ]);
-
-        return view('approval_po.show', compact('pengajuanPo'));
-    }
-
     public function approve(Request $request, PengajuanPo $pengajuanPo)
     {
+        //approve hanya bisa dilakukan keuangan
+        if(Auth::user()->role != 'keuangan'){
+            abort(403);
+        }
+
         foreach ($pengajuanPo->detail as $detail) {
 
             $status = $request->status_item[$detail->id];
@@ -228,7 +247,7 @@ class PengajuanPoController extends Controller
         }
 
         return redirect()
-            ->route('approval_po.index')
+            ->route('pengajuan-po.index')
             ->with('success', 'Pengajuan PO berhasil diproses.');
     }
 }

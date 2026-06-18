@@ -24,11 +24,15 @@ class BarangMasukController extends Controller
     // form tambah barang masuk
     public function create()
     {
+        //create hanya bisa dilakukan oleh logistik
+        if(Auth::user()->role != 'logistik'){
+            abort(403);
+        }
+
         // hanya PO yang sudah disetujui
-        $pengajuanPo = PengajuanPo::where(
-            'status_po',
-            'disetujui'
-        )->get();
+        $pengajuanPo = PengajuanPo::where('status_po', 'disetujui')
+            ->whereDoesntHave('barangMasuk')
+            ->get();
 
         $tanggal = now()->format('dmy');
 
@@ -46,6 +50,11 @@ class BarangMasukController extends Controller
 
     public function store(Request $request)
     {
+        //store hanya bisa dilakukan logistik
+        if(Auth::user()->role != 'logistik'){
+            abort(403);
+        }
+        
         $request->validate([
             // wajib pilih PO
             'pengajuan_po_id' => 'required|exists:pengajuan_po,id',
@@ -67,6 +76,18 @@ class BarangMasukController extends Controller
         $urutan = str_pad($jumlahHariIni + 1, 2, '0', STR_PAD_LEFT);
 
         $kodeBarangMasuk = 'BM' . $tanggal . $urutan;
+
+        $sudahDipakai = BarangMasuk::where(
+            'pengajuan_po_id',
+            $request->pengajuan_po_id
+        )->exists();
+
+        if ($sudahDipakai) {
+            return back()->with(
+                'error',
+                'PO tersebut sudah pernah digunakan untuk Barang Masuk.'
+            );
+        }
 
         DB::transaction(function () use ($request, $kodeBarangMasuk) {
 
@@ -106,15 +127,41 @@ class BarangMasukController extends Controller
 
     public function show(BarangMasuk $barangMasuk)
     {
-        $barangMasuk->load(['detail.barang', 'user']);
+        $barangMasuk->load([
+            'detail.barang',
+            'pengajuanPo',
+            'user'
+        ]);
 
-        return view('barang_masuk.show', compact('barangMasuk'));
+        return view(
+            'barang_masuk.show',
+            compact('barangMasuk')
+        );
     }
 
     public function destroy(BarangMasuk $barangMasuk)
     {
-        $barangMasuk->delete();
+        //hapus hanya bisa dilakukan oleh logistik
+        if(Auth::user()->role != 'logistik'){
+            abort(403);
+        }
 
+        // Kalau suatu saat Barang Masuk dihapus, stoknya tidak kembali berkurang. makanya pake code dibawah biar ngga gitu
+        DB::transaction(function () use ($barangMasuk) {
+            foreach ($barangMasuk->detail as $detail) {
+
+                $barang = $detail->barang;
+
+                $barang->stok -= $detail->qty;
+
+                $barang->status_barang = $this->cekStatusBarang($barang->stok);
+
+                $barang->save();
+            }
+
+            $barangMasuk->delete();
+        });
+        
         return redirect()
             ->route('barang-masuk.index')
             ->with('success', 'Data barang masuk berhasil dihapus.');

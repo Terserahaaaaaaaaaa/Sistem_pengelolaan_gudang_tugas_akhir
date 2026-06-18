@@ -9,9 +9,11 @@
         <p class="text-muted mb-0">Kelola data permintaan barang.</p>
     </div>
 
-    <a href="{{ route('permintaan-barang.create') }}" class="btn btn-primary">
-        <i class="bi bi-plus-circle"></i> Tambah Permintaan
-    </a>
+    @if(Auth::user()->role == 'logistik')
+        <a href="{{ route('permintaan-barang.create') }}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Tambah Permintaan
+        </a>
+    @endif
 </div>
 
 @if(session('success'))
@@ -55,17 +57,27 @@
                                 <i class="bi bi-eye-fill"></i>
                             </a>
 
-                            <form action="{{ route('permintaan-barang.destroy', $item->id) }}"
-                                  method="POST"
-                                  class="d-inline"
-                                  onsubmit="return confirm('Yakin ingin menghapus data ini?')">
-                                @csrf
-                                @method('DELETE')
+                            @if(Auth::user()->role == 'admin')
+                                <a href="{{ route('pengajuan-po.create', ['permintaan_id' => $item->id]) }}"
+                                class="btn btn-primary btn-sm"
+                                title="Buat PO">
+                                    <i class="bi bi-file-earmark-plus"></i>
+                                </a>
+                            @endif
 
-                                <button class="btn btn-danger btn-sm">
-                                    <i class="bi bi-trash-fill"></i>
-                                </button>
-                            </form>
+                            @if(Auth::user()->role == 'logistik')
+                                <form action="{{ route('permintaan-barang.destroy', $item->id) }}"
+                                    method="POST"
+                                    class="d-inline"
+                                    onsubmit="return confirm('Yakin ingin menghapus data ini?')">
+                                    @csrf
+                                    @method('DELETE')
+
+                                    <button class="btn btn-danger btn-sm">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </button>
+                                </form>
+                            @endif
                         </td>
                     </tr>
                     @empty

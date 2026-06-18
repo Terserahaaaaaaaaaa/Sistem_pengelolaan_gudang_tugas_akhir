@@ -52,11 +52,10 @@ Route::put('/user/{user}', [UserController::class, 'update'])
     //barang keluar
     Route::resource('barang-keluar', BarangKeluarController::class);
 
+    //permintaan barang
     Route::resource('permintaan-barang', PermintaanBarangController::class);
 
-    Route::get('/daftar-permintaan', [PermintaanBarangController::class, 'daftarAdmin'])
-        ->name('daftar-permintaan.admin_index');
-
+    //pengajuan po
     Route::get('/pengajuan-po', [PengajuanPoController::class, 'index'])
         ->name('pengajuan-po.index');
 
@@ -72,15 +71,9 @@ Route::put('/user/{user}', [UserController::class, 'update'])
     Route::delete('/pengajuan-po/{pengajuanPo}', [PengajuanPoController::class, 'destroy'])
         ->name('pengajuan-po.destroy');
 
-        // KEUANGAN - APPROVAL PO
-    Route::get('/keuangan/pengajuan-po', [PengajuanPoController::class, 'approvalIndex'])
-        ->name('approval_po.index');
-
-    Route::get('/keuangan/pengajuan-po/{pengajuanPo}', [PengajuanPoController::class, 'approvalShow'])
-        ->name('approval_po.show');
-
-    Route::post('/keuangan/pengajuan-po/{pengajuanPo}/approve', [PengajuanPoController::class, 'approve'])
-        ->name('approval_po.approve');
+    // untuk approve keuangan
+    Route::post('/pengajuan-po/{pengajuanPo}/approve', [PengajuanPoController::class, 'approve'])
+    ->name('pengajuan-po.approve');
 
         //LAPORAN
     Route::get('/laporan', [LaporanController::class, 'index'])

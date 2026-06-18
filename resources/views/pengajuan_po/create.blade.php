@@ -27,19 +27,15 @@
                     <label class="form-label">No PO</label>
 
                     <input type="text"
-                           name="no_po"
-                           class="form-control"
-                           required>
+                            name="no_po"
+                            class="form-control"
+                            value="{{ $noPo }}"
+                            readonly>
                 </div>
 
-                <div class="col-md-4 mb-3">
-                    <label class="form-label">Tanggal PO</label>
-
-                    <input type="date"
-                           name="tanggal_po"
-                           class="form-control"
-                           required>
-                </div>
+                    <input type="hidden"
+                            name="tanggal_po"
+                            value="{{ date('Y-m-d') }}">
 
                 <div class="col-md-4 mb-3">
                     <label class="form-label">Sumber PO</label>

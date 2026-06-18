@@ -10,9 +10,11 @@
         <p class="text-muted mb-0">Kelola data barang keluar gudang.</p>
     </div>
 
-    <a href="{{ route('barang-keluar.create') }}" class="btn btn-primary">
-        <i class="bi bi-plus-circle"></i> Tambah Barang Keluar
-    </a>
+    @if(Auth::user()->role == 'logistik')
+        <a href="{{ route('barang-keluar.create') }}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Tambah Barang Keluar
+        </a>
+    @endif
 </div>
 
 @if(session('success'))
@@ -59,17 +61,19 @@
                                 <i class="bi bi-eye-fill"></i>
                             </a>
 
-                            <form action="{{ route('barang-keluar.destroy', $item->id) }}"
-                                  method="POST"
-                                  class="d-inline"
-                                  onsubmit="return confirm('Yakin ingin menghapus data ini?')">
-                                @csrf
-                                @method('DELETE')
+                            @if(Auth::user()->role == 'logistik')
+                                <form action="{{ route('barang-keluar.destroy', $item->id) }}"
+                                    method="POST"
+                                    class="d-inline"
+                                    onsubmit="return confirm('Yakin ingin menghapus data ini?')">
+                                    @csrf
+                                    @method('DELETE')
 
-                                <button class="btn btn-danger btn-sm" title="Hapus">
-                                    <i class="bi bi-trash-fill"></i>
-                                </button>
-                            </form>
+                                    <button class="btn btn-danger btn-sm" title="Hapus">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </button>
+                                </form>
+                            @endif
                         </td>
                     </tr>
                     @empty
